@@ -1,7 +1,9 @@
 package co.istad.mbanking.init;
 
+import co.istad.mbanking.domain.AccountType;
 import co.istad.mbanking.domain.CardType;
 import co.istad.mbanking.domain.Role;
+import co.istad.mbanking.features.accounttype.AccountTypeRepository;
 import co.istad.mbanking.features.cardtype.CardTypeRepository;
 import co.istad.mbanking.features.user.RoleRepository;
 import jakarta.annotation.PostConstruct;
@@ -16,6 +18,7 @@ public class DataInit {
 
     private final RoleRepository roleRepository;
     private final CardTypeRepository cardTypeRepository;
+    private final AccountTypeRepository accountTypeRepository;
 
     @PostConstruct
     void initRole() {
@@ -50,6 +53,25 @@ public class DataInit {
             masterCard.setIsDeleted(false);
 
             cardTypeRepository.saveAll(List.of(visa,masterCard));
+        }
+    }
+
+    @PostConstruct
+    void initAccountType(){
+        if(accountTypeRepository.count() < 1){
+            AccountType payroll = new AccountType();
+            payroll.setName("Payroll");
+            payroll.setAlias("payroll");
+            payroll.setIsDeleted(false);
+            payroll.setDescription("this is payroll account type");
+
+            AccountType saving = new AccountType();
+            saving.setName("Saving");
+            saving.setAlias("saving");
+            saving.setIsDeleted(false);
+            saving.setDescription("this is saving account type");
+
+            accountTypeRepository.saveAll(List.of(payroll,saving));
         }
     }
 }
