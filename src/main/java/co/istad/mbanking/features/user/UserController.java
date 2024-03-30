@@ -27,7 +27,7 @@ public class UserController {
         userService.changeUserPassword(userPasswordRequest);
     }
 
-    @PutMapping("/{uuid}")
+    @PatchMapping("/{uuid}")
     @ResponseStatus(HttpStatus.OK)
     public void editUserByUuid(@PathVariable String uuid, @RequestBody UserEditRequest userEditRequest){
         userService.editUserProfile(userEditRequest,uuid);
