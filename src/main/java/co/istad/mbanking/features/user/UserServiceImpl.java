@@ -3,6 +3,7 @@ package co.istad.mbanking.features.user;
 import co.istad.mbanking.domain.Role;
 import co.istad.mbanking.domain.User;
 import co.istad.mbanking.features.user.dto.UserCreateRequest;
+import co.istad.mbanking.features.user.dto.UserPasswordRequest;
 import co.istad.mbanking.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService{
 
         if(!request.password().equals(request.confirmedPassword())){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
+                    HttpStatus.BAD_REQUEST,
                     "Password does not match"
             );
         }
@@ -73,5 +74,34 @@ public class UserServiceImpl implements UserService{
         user.setRoles(roleList);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public void changeUserPassword(UserPasswordRequest userPasswordRequest) {
+
+        if(!userRepository.existsByName(userPasswordRequest.name())){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "This user "+userPasswordRequest.name()+" is not exist!"
+            );
+        }
+
+        User user = userRepository.findByPassword(userPasswordRequest.oldPassword())
+                .orElseThrow(()-> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Password does not match!"
+                ));
+
+        if(!userPasswordRequest.NewPassword().equals(userPasswordRequest.confirmedNewPassword())){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password does not match!"
+            );
+        }
+
+        user.setPassword(userPasswordRequest.NewPassword());
+
+        userRepository.save(user);
+
     }
 }

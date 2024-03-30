@@ -1,6 +1,7 @@
 package co.istad.mbanking.features.user;
 
 import co.istad.mbanking.features.user.dto.UserCreateRequest;
+import co.istad.mbanking.features.user.dto.UserPasswordRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,12 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createNew(@Valid @RequestBody UserCreateRequest userCreateRequest){
         userService.createNew(userCreateRequest);
+    }
+
+    @PutMapping("/password")
+    @ResponseStatus(HttpStatus.OK)
+    public void changePassword(@Valid @RequestBody UserPasswordRequest userPasswordRequest){
+        userService.changeUserPassword(userPasswordRequest);
     }
 
 

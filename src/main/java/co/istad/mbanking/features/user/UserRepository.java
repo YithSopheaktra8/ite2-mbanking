@@ -4,6 +4,8 @@ import co.istad.mbanking.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
 
@@ -12,5 +14,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     boolean existsByStudentIdCard(String studentIdCard);
 
     boolean existsByNationalCardId(String nationalCardId);
+
+    boolean existsByName(String name);
+
+    Optional<User> findByPassword(String password);
 
 }
