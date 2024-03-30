@@ -1,6 +1,7 @@
 package co.istad.mbanking.features.user;
 
 import co.istad.mbanking.features.user.dto.UserCreateRequest;
+import co.istad.mbanking.features.user.dto.UserEditRequest;
 import co.istad.mbanking.features.user.dto.UserPasswordRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,10 @@ public class UserController {
         userService.changeUserPassword(userPasswordRequest);
     }
 
+    @PutMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.OK)
+    public void editUserByUuid(@PathVariable String uuid, @RequestBody UserEditRequest userEditRequest){
+        userService.editUserProfile(userEditRequest,uuid);
+    }
 
 }

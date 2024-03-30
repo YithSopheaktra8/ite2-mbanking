@@ -3,6 +3,7 @@ package co.istad.mbanking.features.user;
 import co.istad.mbanking.domain.Role;
 import co.istad.mbanking.domain.User;
 import co.istad.mbanking.features.user.dto.UserCreateRequest;
+import co.istad.mbanking.features.user.dto.UserEditRequest;
 import co.istad.mbanking.features.user.dto.UserPasswordRequest;
 import co.istad.mbanking.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +102,30 @@ public class UserServiceImpl implements UserService{
         }
 
         user.setPassword(userPasswordRequest.NewPassword());
+
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public void editUserProfile(UserEditRequest userEditRequest , String uuid) {
+
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(()-> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User does not exist!"
+                ));
+
+        user.setCityOrProvince(userEditRequest.cityOrProvince());
+        user.setKhanOrDistrict(userEditRequest.khanOrDistrict());
+        user.setSangkatOrCommune(userEditRequest.sangkatOrCommune());
+        user.setVillage(userEditRequest.village());
+        user.setStreet(userEditRequest.street());
+        user.setEmployeeType(userEditRequest.employeeType());
+        user.setPosition(userEditRequest.position());
+        user.setCompanyName(userEditRequest.companyName());
+        user.setMainSourceOfIncome(userEditRequest.mainSourceOfIncome());
+        user.setMonthlyIncomeRange(userEditRequest.monthlyIncomeRange());
 
         userRepository.save(user);
 
