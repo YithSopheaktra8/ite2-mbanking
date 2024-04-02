@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/accountTypes")
+@RequestMapping("api/v1/account-types")
 public class AccountTypeController {
 
     private final AccountTypeService accountTypeService;

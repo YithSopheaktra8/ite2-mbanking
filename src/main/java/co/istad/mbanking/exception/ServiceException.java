@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -33,6 +34,17 @@ public class ServiceException {
                     error.put("message",fieldError.getDefaultMessage());
                     errorList.add(error);
                 });
+        return Map.of("error",errorList);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.REQUEST_ENTITY_TOO_LARGE)
+    public Map<String, Object> handleFileUpload(MaxUploadSizeExceededException ex){
+        Map<String,Object> error = new HashMap<>();
+        error.put("max file upload size", ex.getMaxUploadSize());
+        error.put("message : ", ex.getLocalizedMessage());
+        List<Map<String,Object>> errorList = new ArrayList<>();
+        errorList.add(error);
         return Map.of("error",errorList);
     }
 
