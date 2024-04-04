@@ -41,11 +41,8 @@ public class ServiceException {
     @ResponseStatus(HttpStatus.REQUEST_ENTITY_TOO_LARGE)
     public Map<String, Object> handleFileUpload(MaxUploadSizeExceededException ex){
         Map<String,Object> error = new HashMap<>();
-        error.put("max file upload size", ex.getMaxUploadSize());
-        error.put("message : ", ex.getLocalizedMessage());
-        List<Map<String,Object>> errorList = new ArrayList<>();
-        errorList.add(error);
-        return Map.of("error",errorList);
+        error.put("message", ex.getLocalizedMessage());
+        return Map.of("error",error);
     }
 
 }
