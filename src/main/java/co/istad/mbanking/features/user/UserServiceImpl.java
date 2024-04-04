@@ -6,6 +6,7 @@ import co.istad.mbanking.domain.User;
 import co.istad.mbanking.features.user.dto.*;
 import co.istad.mbanking.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,9 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+
+    @Value("${media.base-uri}")
+    private String mediaUri;
 
     @Override
     public void createNew(UserCreateRequest request) {
@@ -231,6 +235,21 @@ public class UserServiceImpl implements UserService{
         Page<User> users = userRepository.findAll(pageRequest);
         //map result of pagination
         return users.map(user -> userMapper.toUserResponse(user));
+    }
+
+    @Override
+    public String updateProfileImage(String uuid, String mediaName) {
+
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(()->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "User not found!")
+                );
+
+        user.setProfileImage(mediaName);
+        userRepository.save(user);
+
+        return mediaUri +"IMAGE/"+mediaName;
     }
 
 

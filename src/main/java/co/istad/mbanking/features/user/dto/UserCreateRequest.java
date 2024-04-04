@@ -7,38 +7,38 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record UserCreateRequest(
-        @NotNull
-        @Max(9999)
+        @NotNull(message = "Pin is required")
+        @Max(value = 9999, message = "Pin must be 4 digits")
         @Positive
         Integer pin,
 
-        @NotBlank
-        @Size(max = 20)
+        @NotBlank(message = "Phone number is required")
+        @Size(max = 20, message = "Phone number must be at less than 20 characters")
         String phoneNumber,
 
-        @NotBlank
+        @NotBlank(message = "Password is required")
         String password,
 
-        @NotBlank
+        @NotBlank(message = "Confirm password is required")
         String confirmedPassword,
 
-        @NotBlank
+        @NotBlank(message = "Name is required")
         @Size(max = 40)
         String name,
 
-        @NotBlank
-        @Size(max = 20)
+        @NotBlank(message = "National id card is required")
+        @Size(max = 20, message = "National id card must be at less than 20 characters")
         String nationalCardId,
 
-        @NotBlank
-        @Size(max = 6)
+        @NotBlank(message = "Gender is required")
+        @Size(max = 6, message = "Gender must be at less 6 character")
         String gender,
 
-        @NotBlank
-        @Size(max = 20)
+        @NotBlank(message = "Student id card is required")
+        @Size(max = 20, message = "Student id card must be at less than 20 characters")
         String studentIdCard,
 
-        @NotNull
+        @NotNull(message = "Date of birth is required")
         LocalDate dob,
 
         @NotEmpty

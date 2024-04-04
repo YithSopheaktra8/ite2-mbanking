@@ -26,4 +26,6 @@ public interface UserService {
     BasedMessage enableUserByUuid(String uuid);
 
     Page<UserResponse> findList(int page, int limit);
+
+    String updateProfileImage(String uuid,String mediaName);
 }

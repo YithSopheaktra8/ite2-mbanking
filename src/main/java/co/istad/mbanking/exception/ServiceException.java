@@ -1,5 +1,8 @@
 package co.istad.mbanking.exception;
 
+import co.istad.mbanking.base.BaseError;
+import co.istad.mbanking.base.BaseErrorResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,30 +22,16 @@ public class ServiceException {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<?> handleServiceError(ResponseStatusException ex){
-        return ResponseEntity.status(ex.getStatusCode())
-                .body(Map.of("error",ex.getReason()));
-    }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String,Object> handleValidationError(MethodArgumentNotValidException ex){
-        List<Map<String, Object>> errorList = new ArrayList<>();
-        ex.getFieldErrors().stream()
-                .forEach(fieldError -> {
-                    Map<String, Object> error = new HashMap<>();
-                    error.put("field",fieldError.getField());
-                    error.put("message",fieldError.getDefaultMessage());
-                    errorList.add(error);
-                });
-        return Map.of("error",errorList);
-    }
+        BaseError<String> baseError = new BaseError<>();
+        baseError.setCode(ex.getStatusCode().toString());
+        baseError.setDescription(ex.getReason());
 
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    @ResponseStatus(HttpStatus.REQUEST_ENTITY_TOO_LARGE)
-    public Map<String, Object> handleFileUpload(MaxUploadSizeExceededException ex){
-        Map<String,Object> error = new HashMap<>();
-        error.put("message", ex.getLocalizedMessage());
-        return Map.of("error",error);
+        BaseErrorResponse baseErrorResponse = BaseErrorResponse.builder()
+                .baseError(baseError)
+                .build();
+
+        return ResponseEntity.ok(baseErrorResponse) ;
     }
 
 }
