@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "accounts")
+@ToString
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +36,7 @@ public class Account {
     private BigDecimal transferLimit;
 
     // Account has a type
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private AccountType accountType;
 
     @OneToMany(mappedBy = "account")

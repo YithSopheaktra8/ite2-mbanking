@@ -20,7 +20,7 @@ public class UserAccount {
     @ManyToOne
     private User user;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Account account;
 
     private Boolean isDeleted;
