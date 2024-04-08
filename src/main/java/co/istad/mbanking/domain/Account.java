@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "accounts")
-@ToString
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +22,7 @@ public class Account {
     @Column(unique = true, nullable = false, length = 9)
     private String actNo;
 
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String actName;
 
     @Column(length = 100)
