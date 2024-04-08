@@ -9,7 +9,4 @@ public class BigDecimalUtil {
         return transferLimitAmount;
     }
 
-    public void setTransferLimitAmount(BigDecimal transferLimitAmount) {
-        this.transferLimitAmount = transferLimitAmount;
-    }
 }
