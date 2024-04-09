@@ -72,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public Page<TransactionResponse> findAll(int page, int size, String transferType, String sortDirection) {
+    public Page<TransactionResponse> findAll(int page, int size, String transactionType, String sortDirection) {
         if(page < 0 ){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -83,7 +83,7 @@ public class TransactionServiceImpl implements TransactionService{
         if(size < 1){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Size must be greater than or equal to me!"
+                    "Size must be greater than or equal to 1!"
             );
         }
 
@@ -98,10 +98,11 @@ public class TransactionServiceImpl implements TransactionService{
         PageRequest pageRequest = PageRequest.of(page,size, sortByDateTime);
 
         Page<Transaction> transactions;
-        if(transferType.equals("TRANSFER")){
-            transactions = transactionRepository.findAllByTransactionType(transferType, pageRequest);
-        } else if (transferType.equals("PAYMENT")) {
-            transactions = transactionRepository.findAllByTransactionType(transferType, pageRequest);
+
+        if(transactionType.equals("TRANSFER")){
+            transactions = transactionRepository.findAllByTransactionType(transactionType, pageRequest);
+        } else if (transactionType.equals("PAYMENT")) {
+            transactions = transactionRepository.findAllByTransactionType(transactionType, pageRequest);
         }else {
             transactions = transactionRepository.findAll(pageRequest);
         }
