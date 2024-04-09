@@ -105,9 +105,6 @@ public class AccountServiceImpl implements AccountService{
             );
         }
 
-        List<Account> accountList = accountRepository.findAll();
-        log.info("account {}",accountList);
-
         Sort sortByActName = Sort.by(Sort.Direction.ASC, "actName");
         PageRequest pageRequest = PageRequest.of(page,size, sortByActName);
         Page<Account> accounts = accountRepository.findAll(pageRequest);

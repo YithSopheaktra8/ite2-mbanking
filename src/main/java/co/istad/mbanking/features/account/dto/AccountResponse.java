@@ -9,6 +9,7 @@ import co.istad.mbanking.features.user.dto.UserResponse;
 import java.math.BigDecimal;
 
 public record AccountResponse(
+        String actNo,
         String alias,
         String actName,
         BigDecimal balance,

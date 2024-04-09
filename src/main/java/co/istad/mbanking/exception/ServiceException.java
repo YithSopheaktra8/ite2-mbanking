@@ -31,7 +31,9 @@ public class ServiceException {
                 .baseError(baseError)
                 .build();
 
-        return ResponseEntity.ok(baseErrorResponse) ;
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(baseErrorResponse);
     }
 
 }

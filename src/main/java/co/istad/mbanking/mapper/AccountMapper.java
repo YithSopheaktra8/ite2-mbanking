@@ -5,6 +5,7 @@ import co.istad.mbanking.domain.User;
 import co.istad.mbanking.domain.UserAccount;
 import co.istad.mbanking.features.account.dto.AccountCreateRequest;
 import co.istad.mbanking.features.account.dto.AccountResponse;
+import co.istad.mbanking.features.account.dto.AccountSnippetResponse;
 import co.istad.mbanking.features.user.dto.UserDetailsResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,5 +32,6 @@ public interface AccountMapper {
             qualifiedByName = "mapUserDetailResponse")
     List<AccountResponse> toListAccountResponse(List<Account> accounts);
 
+    AccountSnippetResponse toAccountSnippetResponse(Account account);
 
 }
