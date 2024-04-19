@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,12 +29,14 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder encoder;
 
     @Value("${media.base-uri}")
     private String mediaUri;
 
     @Override
     public void createNew(UserCreateRequest request) {
+
         User user = userMapper.fromUserCreateRequest(request);
 
         if(userRepository.existsByNationalCardId(request.nationalCardId())){
@@ -88,10 +91,14 @@ public class UserServiceImpl implements UserService{
 
         user.setUuid(UUID.randomUUID().toString());
         user.setProfileImage("Avatar.png");
+        user.setPassword(encoder.encode(user.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
         user.setIsBlocked(false);
         user.setIsDeleted(false);
         user.setRoles(roleList);
+        user.setAccountNonLocked(true);
+        user.setAccountNonExpired(true);
+        user.setCredentialsNonExpired(true);
 
         userRepository.save(user);
     }
