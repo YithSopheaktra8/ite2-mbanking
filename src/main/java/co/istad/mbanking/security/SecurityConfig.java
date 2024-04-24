@@ -6,8 +6,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -57,10 +59,14 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "api/v1/users/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAuthority("SCOPE_user:read")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accounts/**").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_account:read")
                         .anyRequest()
                         .authenticated()
                 );
@@ -82,11 +88,10 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    @Bean
+    @Primary
+    @Bean("keyPair")
     public KeyPair keyPair() {
-
         try {
-
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             return keyPairGenerator.generateKeyPair();
 
@@ -95,16 +100,18 @@ public class SecurityConfig {
         }
     }
 
-    @Bean
-    public RSAKey rsaKey(KeyPair keyPair) {
+    @Primary
+    @Bean("rsaKey")
+    public RSAKey rsaKey(@Qualifier("keyPair") KeyPair keyPair) {
         return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
                 .privateKey(keyPair().getPrivate())
                 .keyID(UUID.randomUUID().toString())
                 .build();
     }
 
-    @Bean
-    JWKSource<SecurityContext> jwkSource(RSAKey rsaKey) {
+    @Primary
+    @Bean("jwkSource")
+    JWKSource<SecurityContext> jwkSource(@Qualifier("rsaKey") RSAKey rsaKey) {
 
         JWKSet jwkSet = new JWKSet(rsaKey);
 
@@ -112,16 +119,60 @@ public class SecurityConfig {
                 .select(jwkSet));
     }
 
-
     // issue access token or get access token
-    @Bean
-    JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+    @Primary
+    @Bean("jwtEncoder")
+    JwtEncoder jwtEncoder(@Qualifier("jwkSource") JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
 
     // when client submit token from header to get the protected resource
-    @Bean
-    JwtDecoder jwtDecoder(RSAKey rsaKey) throws JOSEException {
+    @Primary
+    @Bean("jwtDecoder")
+    JwtDecoder jwtDecoder(@Qualifier("rsaKey") RSAKey rsaKey) throws JOSEException {
+        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
+                .build();
+    }
+
+
+    @Bean("refreshKeyPair")
+    public KeyPair refreshKeyPair() {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            return keyPairGenerator.generateKeyPair();
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    @Bean("refreshRsaKey")
+    public RSAKey refreshRsaKey(@Qualifier("refreshKeyPair") KeyPair keyPair) {
+        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+                .privateKey(keyPair().getPrivate())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+    }
+
+    @Bean("refreshJwkSource")
+    JWKSource<SecurityContext> refreshJwkSource(@Qualifier("refreshRsaKey") RSAKey rsaKey) {
+
+        JWKSet jwkSet = new JWKSet(rsaKey);
+
+        return ((jwkSelector, securityContext) -> jwkSelector
+                .select(jwkSet));
+    }
+
+    // issue access token or get access token
+    @Bean("refreshJwtEncoder")
+    JwtEncoder refreshJwtEncoder(@Qualifier("refreshJwkSource") JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    // when client submit token from header to get the protected resource
+    @Primary
+    @Bean("refreshJwtDecoder")
+    JwtDecoder refreshJwtDecoder(@Qualifier("refreshRsaKey") RSAKey rsaKey) throws JOSEException {
         return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
                 .build();
     }

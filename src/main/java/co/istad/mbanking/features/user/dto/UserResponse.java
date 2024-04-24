@@ -11,6 +11,7 @@ public record UserResponse(
         String name,
         String profileImage,
         String gender,
-        LocalDate dob
+        LocalDate dob,
+        String phoneNumber
 ) {
 }
