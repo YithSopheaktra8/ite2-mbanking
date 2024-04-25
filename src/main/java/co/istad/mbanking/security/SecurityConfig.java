@@ -1,5 +1,6 @@
 package co.istad.mbanking.security;
 
+import co.istad.mbanking.utils.KeyUtil;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.KeyPair;
@@ -37,6 +39,7 @@ public class SecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final KeyUtil keyUtil;
 
 //
 
@@ -51,6 +54,12 @@ public class SecurityConfig {
 
         return provider;
 
+    }
+
+    @Bean
+    JwtAuthenticationProvider jwtAuthenticationProvider(@Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder){
+        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(refreshJwtDecoder);
+        return provider;
     }
 
     @Bean
@@ -89,29 +98,13 @@ public class SecurityConfig {
     }
 
     @Primary
-    @Bean("keyPair")
-    public KeyPair keyPair() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            return keyPairGenerator.generateKeyPair();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException();
-        }
-    }
-
-    @Primary
-    @Bean("rsaKey")
-    public RSAKey rsaKey(@Qualifier("keyPair") KeyPair keyPair) {
-        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-                .privateKey(keyPair().getPrivate())
-                .keyID(UUID.randomUUID().toString())
-                .build();
-    }
-
-    @Primary
     @Bean("jwkSource")
-    JWKSource<SecurityContext> jwkSource(@Qualifier("rsaKey") RSAKey rsaKey) {
+    JWKSource<SecurityContext> jwkSource(KeyUtil keyUtil) {
+
+        RSAKey rsaKey = new RSAKey.Builder(keyUtil.getAccessTokenPublicKey())
+                .keyID(UUID.randomUUID().toString())
+                .privateKey(keyUtil.getAccessTokenPrivateKey())
+                .build();
 
         JWKSet jwkSet = new JWKSet(rsaKey);
 
@@ -129,33 +122,19 @@ public class SecurityConfig {
     // when client submit token from header to get the protected resource
     @Primary
     @Bean("jwtDecoder")
-    JwtDecoder jwtDecoder(@Qualifier("rsaKey") RSAKey rsaKey) throws JOSEException {
-        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
-                .build();
-    }
-
-
-    @Bean("refreshKeyPair")
-    public KeyPair refreshKeyPair() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            return keyPairGenerator.generateKeyPair();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException();
-        }
-    }
-
-    @Bean("refreshRsaKey")
-    public RSAKey refreshRsaKey(@Qualifier("refreshKeyPair") KeyPair keyPair) {
-        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-                .privateKey(keyPair().getPrivate())
-                .keyID(UUID.randomUUID().toString())
+    JwtDecoder jwtDecoder(KeyUtil keyUtil) throws JOSEException {
+        return NimbusJwtDecoder
+                .withPublicKey(keyUtil.getAccessTokenPublicKey())
                 .build();
     }
 
     @Bean("refreshJwkSource")
-    JWKSource<SecurityContext> refreshJwkSource(@Qualifier("refreshRsaKey") RSAKey rsaKey) {
+    JWKSource<SecurityContext> refreshJwkSource() {
+
+        RSAKey rsaKey = new RSAKey.Builder(keyUtil.getRefreshTokenPublicKey())
+                .keyID(UUID.randomUUID().toString())
+                .privateKey(keyUtil.getRefreshTokenPrivateKey())
+                .build();
 
         JWKSet jwkSet = new JWKSet(rsaKey);
 
@@ -169,14 +148,13 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    // when client submit token from header to get the protected resource
-    @Primary
+    // when client submit token from header or body to get the protected resource
     @Bean("refreshJwtDecoder")
-    JwtDecoder refreshJwtDecoder(@Qualifier("refreshRsaKey") RSAKey rsaKey) throws JOSEException {
-        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
+    JwtDecoder refreshJwtDecoder() {
+        return NimbusJwtDecoder
+                .withPublicKey(keyUtil.getRefreshTokenPublicKey())
                 .build();
     }
-
 
 //    @Bean
 //    InMemoryUserDetailsManager inMemoryUserDetailsManager(){

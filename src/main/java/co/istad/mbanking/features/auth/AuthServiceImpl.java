@@ -11,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +21,8 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements AuthService{
 
     private final DaoAuthenticationProvider daoAuthenticationProvider;
-    private final JwtEncoder jwtEncoder;
     private final AuthTokenService tokenService;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
@@ -37,6 +39,14 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public AuthResponse refresh(RefreshTokenRequest refreshTokenRequest) {
-        return null;
+
+        Authentication authentication = new BearerTokenAuthenticationToken(
+                refreshTokenRequest.refreshToken()
+        );
+
+        authentication = jwtAuthenticationProvider.authenticate(authentication);
+
+
+        return tokenService.createToken(authentication);
     }
 }

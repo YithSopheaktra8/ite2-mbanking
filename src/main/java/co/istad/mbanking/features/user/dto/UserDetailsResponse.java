@@ -6,6 +6,7 @@ import java.util.List;
 
 public record UserDetailsResponse(
         String uuid,
+        String phoneNumber,
         String name,
         String profileImage,
         String gender,

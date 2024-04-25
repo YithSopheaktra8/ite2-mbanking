@@ -33,7 +33,7 @@ public class CustomUserDetail implements UserDetails {
             });
 
         });
-        return user.getRoles();
+        return authorities;
     }
 
     @Override
