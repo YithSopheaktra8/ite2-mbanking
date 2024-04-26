@@ -68,7 +68,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
                 .subject("Access Resource")
                 .audience(List.of("WEB,MOBILE"))
                 .issuedAt(now)
-                .expiresAt(now.plus(25, ChronoUnit.SECONDS))
+                .expiresAt(now.plus(5, ChronoUnit.MINUTES))
                 .claim("scope", scope)
                 .build();
 
